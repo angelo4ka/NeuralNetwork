@@ -94,5 +94,39 @@ namespace NeuralNetwork
 
             return L[layersN - 1].z; // Возвращаем результат
         }
+
+        /// <summary>
+        /// Обратное распространение
+        /// </summary>
+        /// <param name="output">Выход</param>
+        /// <param name="error">Ошибка</param>
+        void Backward(Vector output, ref double error)
+        {
+            int last = layersN - 1;
+
+            error = 0; // Обнуляем ошибку
+
+            for (int i = 0; i < output.n; i++)
+            {
+                double e = L[last].z[i] - output[i]; // Находим разность значений векторов
+
+                deltas[last][i] = e * L[last].df[i]; // Запоминаем дельту
+                error += e * e / 2; // Прибавляем к ошибке половину квадрата значения
+            }
+
+            // Вычисляем каждую предудущю дельту на основе текущей с помощью умножения на транспонированную матрицу
+            for (int k = last; k > 0; k--)
+            {
+                for (int i = 0; i < weights[k].m; i++)
+                {
+                    deltas[k - 1][i] = 0;
+
+                    for (int j = 0; j < weights[k].n; j++)
+                        deltas[k - 1][i] += weights[k][j, i] * deltas[k][j];
+
+                    deltas[k - 1][i] *= L[k - 1].df[i]; // Умножаем получаемое значение на производную предыдущего слоя
+                }
+            }
+        }
     }
 }
