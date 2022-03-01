@@ -11,7 +11,16 @@ namespace NeuralNetwork
     /// </summary>
     class Network
     {
+        struct LayerT
+        {
+            public Vector x; // Вход слоя
+            public Vector z; // Активированный выход слоя
+            public Vector df; // Производная функции активации слоя
+        }
+
         Matrix[] weights; // Матрицы весов слоя
+        LayerT[] L; // Значения на каждом слое
+        Vector[] deltas; // Дельты ошибки на каждом слое
 
         int layersN; // Число слоёв
 
@@ -25,12 +34,20 @@ namespace NeuralNetwork
 
             layersN = sizes.Length - 1; // Запоминаем число слоёв
 
-            weights = new Matrix[layersN]; // Создаём массив матриц
+            weights = new Matrix[layersN]; // Создаём массив матриц весовых коэффициентов
+            L = new LayerT[layersN]; // Создаём массив значений на каждом слое
+            deltas = new Vector[layersN]; // Создаём массив для дельт
 
             // Создаём матрицы весовых коэффициентов для каждого слоя
             for (int k = 1; k < sizes.Length; k++)
             {
-                weights[k - 1] = new Matrix(sizes[k], sizes[k - 1], random);
+                weights[k - 1] = new Matrix(sizes[k], sizes[k - 1], random); // Создаём матрицу весовых коэффициентов
+
+                L[k - 1].x = new Vector(sizes[k - 1]); // Создаём вектор для входа слоя
+                L[k - 1].z = new Vector(sizes[k]); // Создаём вектор для выхода слоя
+                L[k - 1].df = new Vector(sizes[k]); // Создаём вектор для производной слоя
+
+                deltas[k - 1] = new Vector(sizes[k]); // Создаём вектор для дельт
             }
         }
 
@@ -38,34 +55,44 @@ namespace NeuralNetwork
         /// Получение выхода сети (прямое распространение)
         /// </summary>
         /// <param name="input">Входной вектор</param>
-        /// <returns>Выходной вектор</returns>
-        Vector Forward(Vector input)
+        /// <returns>Результат</returns>
+        public Vector Forward(Vector input)
         {
-            Vector output = null; // Объявление будущего выходного вектора
-
             for (int k = 0; k < layersN; k++)
             {
-                output = new Vector(weights[k].n); // Создание нового выходного вектора для каждого слоя
+                if (k == 0)
+                {
+                    for (int i = 0; i < input.n; i++)
+                        L[k].x[i] = input[i];
+                }
+                else
+                {
+                    for (int i = 0; i < L[k - 1].z.n; i++)
+                        L[k].x[i] = L[k - 1].z[i];
+                }
 
                 for (int i = 0; i < weights[k].n; i++)
                 {
                     double y = 0; // Неактивированный выход нейрона
 
                     for (int j = 0; j < weights[k].m; j++)
-                        y += weights[k][i, j] * input[j];
+                        y += weights[k][i, j] * L[k].x[j];
 
-                    // Выполняем активацию с помощью сигмоидальной функции
-                    output[i] = 1 / (1 + Math.Exp(-y));
+                    // Выполняем активацию с помощью сигмоидальной функциии
+                    L[k].z[i] = 1 / (1 + Math.Exp(-y));
+                    L[k].df[i] = L[k].z[i] * (1 - L[k].z[i]);
 
                     // Выполняем активацию с помощью гиперболического тангенса
-                    // output[i] = Math.Tanh(y);
+                    //L[k].z[i] = Math.Tanh(y);
+                    //L[k].df[i] = 1 - L[k].z[i] * L[k].z[i];
 
                     // Выполняем активацию с помощью ReLU
-                    // output[i] = Math.Max(0, y);
+                    //L[k].z[i] = y > 0 ? y : 0;
+                    //L[k].df[i] = y > 0 ? 1 : 0;
                 }
             }
 
-            return output;
+            return L[layersN - 1].z; // Возвращаем результат
         }
     }
 }
