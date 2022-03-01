@@ -146,5 +146,37 @@ namespace NeuralNetwork
                 }
             }
         }
+
+        /// <summary>
+        /// Обучение сети
+        /// </summary>
+        /// <param name="X">Входной вектор</param>
+        /// <param name="Y">Выходной вектор</param>
+        /// <param name="alpha">Скорость обучения</param>
+        /// <param name="eps"></param>
+        /// <param name="epochs"></param>
+        public void Train(Vector[] X, Vector[] Y, double alpha, double eps, int epochs)
+        {
+            int epoch = 1; // Номер эпохи
+
+            double error; // Ошибка эпохи
+
+            do
+            {
+                error = 0; // Обнуляем ошибку
+
+                // Проходимся по всем элементам обучающего множества
+                for (int i = 0; i < X.Length; i++)
+                {
+                    Forward(X[i]); // Прямое распространение сигнала
+                    Backward(Y[i], ref error); // Обратное распространение ошибки
+                    UpdateWeights(alpha); // Обновление весовых коэффициентов
+                }
+
+                Console.WriteLine($"epoch: {epoch}, error: {error}"); // Выводим в консоль номер эпохи и величину ошибку
+
+                epoch++; // Увеличиваем номер эпохи
+            } while (epoch <= epochs && error > eps);
+        }
     }
 }
