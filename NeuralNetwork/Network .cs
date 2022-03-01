@@ -128,5 +128,23 @@ namespace NeuralNetwork
                 }
             }
         }
+
+        /// <summary>
+        /// Обновление весовых коэффициентов
+        /// </summary>
+        /// <param name="alpha">Cкорость обучения</param>
+        void UpdateWeights(double alpha)
+        {
+            for (int k = 0; k < layersN; k++)
+            {
+                for (int i = 0; i < weights[k].n; i++)
+                {
+                    for (int j = 0; j < weights[k].m; j++)
+                    {
+                        weights[k][i, j] -= alpha * deltas[k][i] * L[k].x[j];
+                    }
+                }
+            }
+        }
     }
 }
