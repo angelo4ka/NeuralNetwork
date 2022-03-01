@@ -150,8 +150,8 @@ namespace NeuralNetwork
         /// <summary>
         /// Обучение сети
         /// </summary>
-        /// <param name="X">Входной вектор</param>
-        /// <param name="Y">Выходной вектор</param>
+        /// <param name="X">Массив входных обучающих векторов</param>
+        /// <param name="Y">Массив выходных обучающих векторов</param>
         /// <param name="alpha">Скорость обучения</param>
         /// <param name="eps"></param>
         /// <param name="epochs"></param>
